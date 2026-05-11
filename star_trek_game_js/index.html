@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Trek: Temporal Rift — A Text Adventure</title>
+    <meta name="description" content="A Star Trek themed text-adventure RPG. Choose your captain, explore a derelict starship, and retrieve the Time Crystal.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- ========== START SCREEN ========== -->
+    <div id="screen-start" class="game-screen active">
+        <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
+            <div class="lcars-border p-4 text-center" style="max-width: 520px; width: 100%;">
+                <h1 class="title-glow mb-2">★ STAR TREK ★</h1>
+                <h2 class="subtitle mb-4">Temporal Rift</h2>
+                <p class="text-amber mb-4">A derelict starship. A stolen Time Crystal. Your mission begins now.</p>
+                <div class="d-grid gap-3">
+                    <button id="btnNewGame" class="btn btn-trek btn-lg">New Game</button>
+                    <button id="btnResume" class="btn btn-trek-outline btn-lg" disabled>Resume Game</button>
+                </div>
+            </div>
+            <div class="scanline"></div>
+        </div>
+    </div>
+
+    <!-- ========== CHARACTER SELECT ========== -->
+    <div id="screen-select" class="game-screen">
+        <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
+            <div class="lcars-border p-4" style="max-width: 600px; width: 100%;">
+                <h2 class="text-amber mb-3 text-center">Select Your Officer</h2>
+                <div class="mb-3">
+                    <select id="cmbPlayers" class="form-select trek-select">
+                        <option value="Picard">Jean-Luc Picard</option>
+                        <option value="Worf">Worf</option>
+                        <option value="Spock">Spock</option>
+                        <option value="Sisko">Benjamin Sisko</option>
+                    </select>
+                </div>
+
+                <div id="charPreview" class="char-preview mb-3">
+                    <div class="row g-2">
+                        <div class="col-6"><span class="stat-label">HP:</span> <span id="prevHP">—</span></div>
+                        <div class="col-6"><span class="stat-label">STR:</span> <span id="prevSTR">—</span></div>
+                        <div class="col-6"><span class="stat-label">DEX:</span> <span id="prevDEX">—</span></div>
+                        <div class="col-6"><span class="stat-label">DEF:</span> <span id="prevDEF">—</span></div>
+                        <div class="col-6"><span class="stat-label">WIS:</span> <span id="prevWIS">—</span></div>
+                    </div>
+                    <hr class="border-amber">
+                    <p class="stat-label mb-1">Abilities:</p>
+                    <ul id="prevAbilities" class="list-unstyled mb-0"></ul>
+                </div>
+
+                <div class="d-grid">
+                    <button id="btnStartGame" class="btn btn-trek btn-lg">Engage!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MAIN GAME ========== -->
+    <div id="screen-game" class="game-screen">
+        <div class="container-fluid p-2 p-md-3">
+            <div class="row g-2">
+
+                <!-- LEFT: Player Stats -->
+                <div class="col-lg-3 col-md-4">
+                    <div class="panel">
+                        <h5 class="panel-header">Officer Status</h5>
+                        <p class="mb-1" id="lblPlayerName">—</p>
+                        <div class="hp-bar-container mb-2">
+                            <div id="pbPlayerHealth" class="hp-bar" style="width:100%"></div>
+                            <span id="lblPlayerMaxHP" class="hp-text">—</span>
+                        </div>
+                        <div class="stats-grid">
+                            <span id="lblPlayerStrength">STR: —</span>
+                            <span id="lblPlayerDexterity">DEX: —</span>
+                            <span id="lblPlayerDefense">DEF: —</span>
+                            <span id="lblPlayerWisdom">WIS: —</span>
+                        </div>
+                        <hr class="border-amber">
+                        <p class="stat-label mb-1">Abilities</p>
+                        <ul id="lbPlayerAbilities" class="ability-list"></ul>
+
+                        <hr class="border-amber">
+                        <p class="stat-label mb-1">Inventory</p>
+                        <ul id="lbInventory" class="inventory-list"></ul>
+
+                        <hr class="border-amber">
+                        <p class="stat-label mb-1">Actions Taken</p>
+                        <ul id="lbActionsTaken" class="actions-list"></ul>
+                    </div>
+                </div>
+
+                <!-- CENTER: Game Log + Controls -->
+                <div class="col-lg-6 col-md-4">
+                    <div class="panel" style="height: 100%; display:flex; flex-direction:column;">
+                        <h5 class="panel-header">Ship Log</h5>
+                        <div id="txtGameLog" class="game-log flex-grow-1"></div>
+
+                        <!-- Movement Controls -->
+                        <div id="pnlMovement" class="controls-panel mt-2">
+                            <div class="d-flex justify-content-center">
+                                <div class="movement-grid">
+                                    <div></div>
+                                    <button id="btnUp" class="btn btn-trek-sm">↑</button>
+                                    <div></div>
+                                    <button id="btnLeft" class="btn btn-trek-sm">←</button>
+                                    <div class="coord-display"><span id="txtX">0</span>,<span id="txtY">0</span></div>
+                                    <button id="btnRight" class="btn btn-trek-sm">→</button>
+                                    <div></div>
+                                    <button id="btnDown" class="btn btn-trek-sm">↓</button>
+                                    <div></div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center gap-2 mt-2">
+                                <button id="btnAction" class="btn btn-trek d-none">Action</button>
+                            </div>
+                        </div>
+
+                        <!-- Combat Controls -->
+                        <div id="pnlCombat" class="controls-panel mt-2 d-none">
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                <button id="btnFight" class="btn btn-trek">⚔️ Attack</button>
+                                <button id="btnUseAbility" class="btn btn-trek-outline">Use Ability</button>
+                            </div>
+                        </div>
+
+                        <!-- Bottom bar -->
+                        <div class="d-flex justify-content-between mt-2">
+                            <button id="btnSaveQuit" class="btn btn-trek-sm btn-sm">Save & Quit</button>
+                            <button id="btnStartOver" class="btn btn-danger-trek btn-sm">Start Over</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Enemy Stats -->
+                <div class="col-lg-3 col-md-4">
+                    <div id="pnlEnemyStats" class="panel d-none">
+                        <h5 class="panel-header">Hostile Contact</h5>
+                        <p class="mb-1" id="lblEnemyName">—</p>
+                        <div class="hp-bar-container mb-2">
+                            <div id="pbEnemyHealth" class="hp-bar hp-bar-enemy" style="width:100%"></div>
+                            <span id="lblEnemyMaxHP" class="hp-text">—</span>
+                        </div>
+                        <div class="stats-grid">
+                            <span id="lblEnemyStrength">STR: —</span>
+                            <span id="lblEnemyDexterity">DEX: —</span>
+                            <span id="lblEnemyDefense">DEF: —</span>
+                            <span id="lblEnemyWisdom">WIS: —</span>
+                        </div>
+                        <hr class="border-amber">
+                        <p class="stat-label mb-1">Enemy Abilities</p>
+                        <ul id="lbEnemyAbilities" class="ability-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== GAME OVER / VICTORY MODAL ========== -->
+    <div class="modal fade" id="gameModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content trek-modal">
+                <div class="modal-header border-amber">
+                    <h5 class="modal-title text-amber" id="modalTitle">—</h5>
+                </div>
+                <div class="modal-body" id="modalBody">—</div>
+                <div class="modal-footer border-amber">
+                    <button id="modalBtnYes" class="btn btn-trek">Play Again</button>
+                    <button id="modalBtnNo" class="btn btn-trek-outline" data-bs-dismiss="modal">Quit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/Character.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/Enemy.js"></script>
+    <script src="js/Abilities.js"></script>
+    <script src="js/Enemies.js"></script>
+    <script src="js/Room.js"></script>
+    <script src="js/Maze.js"></script>
+    <script src="js/GameState.js"></script>
+    <script src="js/CombatEngine.js"></script>
+    <script src="js/GameForm.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
